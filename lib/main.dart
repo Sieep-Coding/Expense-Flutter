@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'expense.dart';
-import 'settings_page.dart';
+import 'expense.dart'; // Import your other files as needed
+import 'settings_page.dart'; // Import the SettingsPage file
 
 void main() {
   runApp(const ExpenseTrackerApp());
@@ -17,10 +17,10 @@ class ExpenseTrackerApp extends StatelessWidget {
         primarySwatch: Colors.teal,
         brightness: Brightness.dark,
       ),
-      initialRoute: '/',
+      initialRoute: '/', // Specify the initial route
       routes: {
         '/': (context) => const HomePage(),
-        '/settings': (context) => const SettingsPage(),
+        '/settings': (context) => const SettingsPage(), // Add the route for SettingsPage
       },
     );
   }
@@ -36,16 +36,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Expense> expenses = [];
 
-  void _addExpense(
-      String title, double amount, DateTime date, String category) {
+  void _addExpense(String title, double amount, DateTime date, String category) {
     setState(() {
       expenses.add(Expense(title, amount, date, category));
-    });
-  }
-
-  void _deleteExpense(int index) {
-    setState(() {
-      expenses.removeAt(index);
     });
   }
 
@@ -60,7 +53,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              Navigator.pushNamed(context, '/settings');
+              Navigator.pushNamed(context, '/settings'); // Navigate to SettingsPage
             },
           ),
         ],
@@ -68,6 +61,7 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           const SizedBox(height: 25),
+          const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
               itemCount: expenses.length,
@@ -89,7 +83,9 @@ class _HomePageState extends State<HomePage> {
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () {
-                        _deleteExpense(index);
+                        setState(() {
+                          expenses.removeAt(index);
+                        });
                       },
                     ),
                   ),
@@ -127,6 +123,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _date;
+  String? _expenseType;
   String? _category;
 
   @override
@@ -271,6 +268,55 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                   return null;
                 },
               ),
+              const SizedBox(height: 9),
+              DropdownButtonFormField<String>(
+                value: _expenseType,
+                decoration: const InputDecoration(
+                  labelText: 'Frequency',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.teal),
+                  ),
+                ),
+                dropdownColor: Colors.grey[800],
+                style: const TextStyle(color: Colors.white),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'Daily',
+                    child: Text('Daily'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Weekly',
+                    child: Text('Weekly'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Monthly',
+                    child: Text('Monthly'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Bi-Monthly',
+                    child: Text('Bi-Monthly'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Yearly',
+                    child: Text('Yearly'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _expenseType = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a frequency';
+                  }
+                  return null;
+                },
+              ),
             ],
           ),
         ),
@@ -297,22 +343,18 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
               Navigator.pop(context);
             }
           },
-          style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.teal,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          child: const Text('Add'),
+          child: const Text('Add Expense'),
         ),
       ],
     );
   }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _amountController.dispose();
-    super.dispose();
-  }
 }
+
+// class Expense {
+//   final String title;
+//   final double amount;
+//   final DateTime date;
+//   final String category;
+//
+//   Expense(this.title, this.amount, this.date, this.category);
+// }
