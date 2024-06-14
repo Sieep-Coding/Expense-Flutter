@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'expense.dart';
 import 'settings_page.dart';
-import 'background.dart';
-import 'add_expense_dialog.dart';
 
 void main() {
   runApp(const ExpenseTrackerApp());
 }
 
 class ExpenseTrackerApp extends StatelessWidget {
-  const ExpenseTrackerApp({super.key});
+  const ExpenseTrackerApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +27,7 @@ class ExpenseTrackerApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -42,6 +40,12 @@ class _HomePageState extends State<HomePage> {
       String title, double amount, DateTime date, String category) {
     setState(() {
       expenses.add(Expense(title, amount, date, category));
+    });
+  }
+
+  void _deleteExpense(int index) {
+    setState(() {
+      expenses.removeAt(index);
     });
   }
 
@@ -64,7 +68,6 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           const SizedBox(height: 25),
-          const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
               itemCount: expenses.length,
@@ -86,9 +89,7 @@ class _HomePageState extends State<HomePage> {
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () {
-                        setState(() {
-                          expenses.removeAt(index);
-                        });
+                        _deleteExpense(index);
                       },
                     ),
                   ),
@@ -112,246 +113,197 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+class AddExpenseDialog extends StatefulWidget {
+  final Function(String, double, DateTime, String) addExpense;
+
+  const AddExpenseDialog({Key? key, required this.addExpense}) : super(key: key);
+
+  @override
+  State<AddExpenseDialog> createState() => _AddExpenseDialogState();
+}
+
 class _AddExpenseDialogState extends State<AddExpenseDialog> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _date;
-  String? _expenseType;
   String? _category;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Background Widget with Icon (using BackgroundWidget)
-        BackgroundWidget(), // Use the BackgroundWidget here
-
-        // AlertDialog on top of Background
-        AlertDialog(
-          backgroundColor: Colors.grey[800],
-          title: const Text(
-            'Add Expense',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Title',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.teal),
-                      ),
-                    ),
-                    style: const TextStyle(color: Colors.white),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a title';
-                      }
-                      return null;
-                    },
+    return AlertDialog(
+      backgroundColor: Colors.grey[800],
+      title: const Text(
+        'Add Expense',
+        style: TextStyle(color: Colors.white),
+      ),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _amountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Amount',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.teal),
-                      ),
-                    ),
-                    style: const TextStyle(color: Colors.white),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter an amount';
-                      }
-                      return null;
-                    },
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.teal),
                   ),
-                  const SizedBox(height: 12),
-                  ListTile(
-                    title: const Text(
-                      'Reoccurring Date',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    trailing: Text(
-                      _date == null ? 'Select Date' : _date.toString().split(' ')[0],
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    onTap: () async {
-                      final pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                        builder: (context, child) {
-                          return Theme(
-                            data: ThemeData.dark().copyWith(
-                              colorScheme: const ColorScheme.dark(
-                                primary: Colors.teal,
-                                onPrimary: Colors.white,
-                                surface: Colors.grey,
-                                onSurface: Colors.white,
-                              ),
-                            ),
-                            child: child!,
-                          );
-                        },
+                ),
+                style: const TextStyle(color: Colors.white),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a title';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 9),
+              TextFormField(
+                controller: _amountController,
+                decoration: const InputDecoration(
+                  labelText: 'Amount',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.teal),
+                  ),
+                ),
+                style: const TextStyle(color: Colors.white),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an amount';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 9),
+              ListTile(
+                title: const Text(
+                  'Reoccuring Date',
+                  style: TextStyle(color: Colors.white),
+                ),
+                trailing: Text(
+                  _date == null ? 'Select Date' : _date.toString().split(' ')[0],
+                  style: const TextStyle(color: Colors.white),
+                ),
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                    builder: (context, child) {
+                      return Theme(
+                        data: ThemeData.dark().copyWith(
+                          colorScheme: const ColorScheme.dark(
+                            primary: Colors.teal,
+                            onPrimary: Colors.white,
+                            surface: Colors.grey,
+                            onSurface: Colors.white,
+                          ),
+                        ),
+                        child: child!,
                       );
-                      if (pickedDate != null) {
-                        setState(() {
-                          _date = pickedDate;
-                        });
-                      }
                     },
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _date = pickedDate;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 9),
+              DropdownButtonFormField<String>(
+                value: _category,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  labelStyle: TextStyle(color: Colors.white),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
                   ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    value: _category,
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.teal),
-                      ),
-                    ),
-                    dropdownColor: Colors.grey[800],
-                    style: const TextStyle(color: Colors.white),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Food',
-                        child: Text('Food'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Transportation',
-                        child: Text('Transportation'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Living',
-                        child: Text('Living'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Entertainment',
-                        child: Text('Entertainment'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Misc.',
-                        child: Text('Misc.'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _category = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a category';
-                      }
-                      return null;
-                    },
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.teal),
                   ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    value: _expenseType,
-                    decoration: const InputDecoration(
-                      labelText: 'Frequency',
-                      labelStyle: TextStyle(color: Colors.white),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.teal),
-                      ),
-                    ),
-                    dropdownColor: Colors.grey[800],
-                    style: const TextStyle(color: Colors.white),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Daily',
-                        child: Text('Daily'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Weekly',
-                        child: Text('Weekly'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Monthly',
-                        child: Text('Monthly'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Bi-Monthly',
-                        child: Text('Bi-Monthly'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Yearly',
-                        child: Text('Yearly'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _expenseType = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a frequency';
-                      }
-                      return null;
-                    },
+                ),
+                dropdownColor: Colors.grey[800],
+                style: const TextStyle(color: Colors.white),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'Food',
+                    child: Text('Food'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Transportation',
+                    child: Text('Transportation'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Living',
+                    child: Text('Living'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Entertainment',
+                    child: Text('Entertainment'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Misc.',
+                    child: Text('Misc.'),
                   ),
                 ],
+                onChanged: (value) {
+                  setState(() {
+                    _category = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a category';
+                  }
+                  return null;
+                },
               ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              widget.addExpense(
+                _titleController.text,
+                double.parse(_amountController.text),
+                _date!,
+                _category!,
+              );
+              Navigator.pop(context);
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.teal,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  widget.addExpense(
-                    _titleController.text,
-                    double.parse(_amountController.text),
-                    _date!,
-                    _category!,
-                  );
-                  Navigator.pop(context);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.teal,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: const Text('Add'),
-            ),
-          ],
+          child: const Text('Add'),
         ),
       ],
     );
