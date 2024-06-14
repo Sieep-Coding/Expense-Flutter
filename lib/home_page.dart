@@ -3,7 +3,7 @@ import 'add_expense_dialog.dart';
 import 'expense.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Expense Tracker'),
+        title: const Text('ThriftyTrail Expense Tracking'),
         centerTitle: true,
         actions: [
           IconButton(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AddExpenseDialog extends StatefulWidget {
   final Function(String, double, DateTime, String) addExpense;
 
-  const AddExpenseDialog({Key? key, required this.addExpense}) : super(key: key);
+  const AddExpenseDialog({super.key, required this.addExpense});
 
   @override
   State<AddExpenseDialog> createState() => _AddExpenseDialogState();
@@ -14,7 +14,6 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _date;
-  String? _expenseType;
   String? _category;
 
   @override
