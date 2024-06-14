@@ -51,15 +51,10 @@ Contributions are welcome! If you'd like to contribute to **Expense Tracker**, f
 📄 License
 ----------
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [UNLICENSE](LICENSE).
 
 * * *
 
-📧 Contact
-----------
-
-For any inquiries or support, please contact [your\_email@example.com](mailto:your_email@example.com).
-
 * * *
 
-Made with ❤️ by [Your Name](https://github.com/your_username)
+Made with ❤️ by [Sieep](https://github.com/Sieep-Coding)
