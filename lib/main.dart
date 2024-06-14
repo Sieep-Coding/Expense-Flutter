@@ -12,7 +12,8 @@ class ExpenseTrackerApp extends StatelessWidget {
     return MaterialApp(
       title: 'Expense Tracker',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.teal,
+        brightness: Brightness.dark,
       ),
       home: const HomePage(),
     );
@@ -29,7 +30,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Expense> expenses = [];
 
-  void _addExpense(String title, double amount, DateTime date, String category) {
+  void _addExpense(
+      String title, double amount, DateTime date, String category) {
     setState(() {
       expenses.add(Expense(title, amount, date, category));
     });
@@ -38,19 +40,49 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('Expense Tracker'),
+        centerTitle: true,
       ),
       body: Column(
         children: [
+          const SizedBox(height: 25),
+          // const Text(
+          //   'Your Expenses',
+          //   style: TextStyle(
+          //     fontSize: 24,
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors.white,
+          //   ),
+          // ),
+          const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
               itemCount: expenses.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(expenses[index].title),
-                  subtitle: Text(
-                    '${expenses[index].amount} - ${expenses[index].date.toString().split(' ')[0]} - ${expenses[index].category}',
+                return Card(
+                  color: Colors.grey[800],
+                  child: ListTile(
+                    title: Text(
+                      expenses[index].title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${expenses[index].amount} - ${expenses[index].date.toString().split(' ')[0]} - ${expenses[index].category}',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          expenses.removeAt(index);
+                        });
+                      },
+                    ),
                   ),
                 );
               },
@@ -65,6 +97,7 @@ class _HomePageState extends State<HomePage> {
             builder: (context) => AddExpenseDialog(addExpense: _addExpense),
           );
         },
+        backgroundColor: Colors.teal,
         child: const Icon(Icons.add),
       ),
     );
@@ -94,12 +127,18 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   DateTime? _date;
+  String? _expenseType;
   String? _category;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add Expense'),
+      backgroundColor: Colors.grey[800],
+      title: const Text(
+        'Add Expense',
+        style: TextStyle(color: Colors.white),
+      ),
+
       content: Form(
         key: _formKey,
         child: Column(
@@ -109,7 +148,15 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
               controller: _titleController,
               decoration: const InputDecoration(
                 labelText: 'Title',
+                labelStyle: TextStyle(color: Colors.white),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.teal),
+                ),
               ),
+              style: const TextStyle(color: Colors.white),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a title';
@@ -117,11 +164,20 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                 return null;
               },
             ),
+            const SizedBox(height: 8),
             TextFormField(
               controller: _amountController,
               decoration: const InputDecoration(
                 labelText: 'Amount',
+                labelStyle: TextStyle(color: Colors.white),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.teal),
+                ),
               ),
+              style: const TextStyle(color: Colors.white),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -130,10 +186,15 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                 return null;
               },
             ),
+            const SizedBox(height: 8),
             ListTile(
-              title: const Text('Date'),
+              title: const Text(
+                'Date',
+                style: TextStyle(color: Colors.white),
+              ),
               trailing: Text(
                 _date == null ? 'Select Date' : _date.toString().split(' ')[0],
+                style: const TextStyle(color: Colors.white),
               ),
               onTap: () async {
                 final pickedDate = await showDatePicker(
@@ -141,6 +202,19 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                   initialDate: DateTime.now(),
                   firstDate: DateTime(2000),
                   lastDate: DateTime(2100),
+                  builder: (context, child) {
+                    return Theme(
+                      data: ThemeData.dark().copyWith(
+                        colorScheme: const ColorScheme.dark(
+                          primary: Colors.teal,
+                          onPrimary: Colors.white,
+                          surface: Colors.grey,
+                          onSurface: Colors.white,
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
                 );
                 if (pickedDate != null) {
                   setState(() {
@@ -149,11 +223,21 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                 }
               },
             ),
+            const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: _category,
               decoration: const InputDecoration(
-                labelText: 'Category',
+                labelText: 'Expense Type',
+                labelStyle: TextStyle(color: Colors.white),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.teal),
+                ),
               ),
+              dropdownColor: Colors.grey[800],
+              style: const TextStyle(color: Colors.white),
               items: const [
                 DropdownMenuItem(
                   value: 'Food',
@@ -164,10 +248,19 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                   child: Text('Transportation'),
                 ),
                 DropdownMenuItem(
+                  value: 'Living',
+                  child: Text('Living'),
+                ),
+                DropdownMenuItem(
                   value: 'Entertainment',
                   child: Text('Entertainment'),
                 ),
+                DropdownMenuItem(
+                  value: 'Misc.',
+                  child: Text('Misc.'),
+                ),
               ],
+
               onChanged: (value) {
                 setState(() {
                   _category = value;
@@ -175,7 +268,57 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please select a category';
+                  return 'please select a category';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              value: _expenseType,
+              decoration: const InputDecoration(
+                labelText: 'Frequency',
+                labelStyle: TextStyle(color: Colors.white),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.teal),
+                ),
+              ),
+              dropdownColor: Colors.grey[800],
+              style: const TextStyle(color: Colors.white),
+              items: const [
+                DropdownMenuItem(
+                  value: 'Daily',
+                  child: Text('Daily'),
+                ),
+                DropdownMenuItem(
+                  value: 'Weekly',
+                  child: Text('Weekly'),
+                ),
+                DropdownMenuItem(
+                  value: 'Monthly',
+                  child: Text('Monthly'),
+                ),
+                DropdownMenuItem(
+                  value: 'Bi-Monthly',
+                  child: Text('Bi-Monthly'),
+                ),
+                DropdownMenuItem(
+                  value: 'Yearly',
+                  child: Text('Yearly'),
+                ),
+              ],
+
+              onChanged: (value) {
+                setState(() {
+                  _expenseType = value;
+                });
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'please select a category';
                 }
                 return null;
               },
@@ -188,7 +331,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text('Cancel'),
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
         ElevatedButton(
           onPressed: () {
@@ -202,11 +348,18 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
               Navigator.pop(context);
             }
           },
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.teal,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
           child: const Text('Add'),
         ),
       ],
     );
   }
+
 
   @override
   void dispose() {
