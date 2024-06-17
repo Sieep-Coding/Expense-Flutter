@@ -1,44 +1,58 @@
 import 'package:flutter/material.dart';
-import 'expense.dart'; // Import your other files as needed
-import 'settings_page.dart'; // Import the SettingsPage file
+import 'settings_page.dart';
+import 'data_source_picker.dart';
+import 'data_model.dart';
 
 void main() {
-  runApp(const ExpenseTrackerApp());
+  runApp(const BusinessIntelligenceApp());
 }
 
-class ExpenseTrackerApp extends StatelessWidget {
-  const ExpenseTrackerApp({Key? key}) : super(key: key);
+class BusinessIntelligenceApp extends StatelessWidget {
+  const BusinessIntelligenceApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ThriftyTrail',
+      title: 'Business Intelligence',
       theme: ThemeData(
         primarySwatch: Colors.teal,
         brightness: Brightness.dark,
       ),
-      initialRoute: '/', // Specify the initial route
+      initialRoute: '/',
       routes: {
         '/': (context) => const HomePage(),
-        '/settings': (context) => const SettingsPage(), // Add the route for SettingsPage
+        '/settings': (context) => const SettingsPage(),
       },
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Expense> expenses = [];
+  List<DataModel> data = [];
 
-  void _addExpense(String title, double amount, DateTime date, String category) {
+  void _loadData(String dataSource, String fileType) async {
+    // Implement data loading logic here based on the data source and file type
+    // You might need to use packages like csv or http to load data from files or APIs
+    // For example:
+    // if (fileType == 'csv') {
+    //   final csvData = await rootBundle.loadString('path/to/data.csv');
+    //   final rows = const CsvToListConverter().convert(csvData);
+    //   // Process rows and add to data list
+    // } else if (fileType == 'json') {
+    //   final jsonData = await rootBundle.loadString('path/to/data.json');
+    //   final jsonList = jsonDecode(jsonData) as List<dynamic>;
+    //   // Process jsonList and add to data list
+    // }
+
     setState(() {
-      expenses.add(Expense(title, amount, date, category));
+      // Add loaded data to the data list
     });
   }
 
@@ -47,13 +61,13 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Start A Trail'),
+        title: const Text('Business Intelligence'),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              Navigator.pushNamed(context, '/settings'); // Navigate to SettingsPage
+              Navigator.pushNamed(context, '/settings');
             },
           ),
         ],
@@ -61,32 +75,42 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           const SizedBox(height: 25),
+          const Text(
+            'Data Sources',
+            style: TextStyle(fontSize: 24, color: Colors.white),
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
-              itemCount: expenses.length,
+              itemCount: data.length,
               itemBuilder: (context, index) {
-                return Card(
-                  color: Colors.grey[800],
-                  child: ListTile(
-                    title: Text(
-                      expenses[index].title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                return GestureDetector(
+                  onTap: () {
+                    // Implement data details view or action here
+                  },
+                  child: Card(
+                    color: Colors.grey[800],
+                    child: ListTile(
+                      leading: _getDataIcon(data[index].dataType),
+                      title: Text(
+                        data[index].title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    subtitle: Text(
-                      '${expenses[index].amount} - ${expenses[index].date.toString().split(' ')[0]} - ${expenses[index].category}',
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        setState(() {
-                          expenses.removeAt(index);
-                        });
-                      },
+                      subtitle: Text(
+                        data[index].description,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          setState(() {
+                            data.removeAt(index);
+                          });
+                        },
+                      ),
                     ),
                   ),
                 );
@@ -99,7 +123,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) => AddExpenseDialog(addExpense: _addExpense),
+            builder: (context) => DataSourcePickerDialog(loadData: _loadData),
           );
         },
         backgroundColor: Colors.teal,
@@ -107,31 +131,41 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Icon _getDataIcon(String dataType) {
+    switch (dataType) {
+      case 'Sales':
+        return const Icon(Icons.shopping_cart, color: Colors.white);
+      case 'Finance':
+        return const Icon(Icons.attach_money, color: Colors.white);
+      case 'Marketing':
+        return const Icon(Icons.campaign, color: Colors.white);
+      default:
+        return const Icon(Icons.data_object, color: Colors.white);
+    }
+  }
 }
 
-class AddExpenseDialog extends StatefulWidget {
-  final Function(String, double, DateTime, String) addExpense;
+class DataSourcePickerDialog extends StatefulWidget {
+  final Function(String, String) loadData;
 
-  const AddExpenseDialog({Key? key, required this.addExpense}) : super(key: key);
+  const DataSourcePickerDialog({super.key, required this.loadData});
 
   @override
-  State<AddExpenseDialog> createState() => _AddExpenseDialogState();
+  State<DataSourcePickerDialog> createState() => _DataSourcePickerDialogState();
 }
 
-class _AddExpenseDialogState extends State<AddExpenseDialog> {
+class _DataSourcePickerDialogState extends State<DataSourcePickerDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _amountController = TextEditingController();
-  DateTime? _date;
-  String? _expenseType;
-  String? _category;
+  String? _dataSource;
+  String? _fileType;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.grey[800],
       title: const Text(
-        'Add Expense',
+        'Load Data',
         style: TextStyle(color: Colors.white),
       ),
       content: SingleChildScrollView(
@@ -140,90 +174,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.teal),
-                  ),
-                ),
-                style: const TextStyle(color: Colors.white),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 9),
-              TextFormField(
-                controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: 'Amount',
-                  labelStyle: TextStyle(color: Colors.white),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.teal),
-                  ),
-                ),
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an amount';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 9),
-              ListTile(
-                title: const Text(
-                  'Reoccuring Date',
-                  style: TextStyle(color: Colors.white),
-                ),
-                trailing: Text(
-                  _date == null ? 'Select Date' : _date.toString().split(' ')[0],
-                  style: const TextStyle(color: Colors.white),
-                ),
-                onTap: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                    builder: (context, child) {
-                      return Theme(
-                        data: ThemeData.dark().copyWith(
-                          colorScheme: const ColorScheme.dark(
-                            primary: Colors.teal,
-                            onPrimary: Colors.white,
-                            surface: Colors.grey,
-                            onSurface: Colors.white,
-                          ),
-                        ),
-                        child: child!,
-                      );
-                    },
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      _date = pickedDate;
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 9),
               DropdownButtonFormField<String>(
-                value: _category,
+                value: _dataSource,
                 decoration: const InputDecoration(
-                  labelText: 'Category',
+                  labelText: 'Data Source',
                   labelStyle: TextStyle(color: Colors.white),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
@@ -236,43 +190,31 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                 style: const TextStyle(color: Colors.white),
                 items: const [
                   DropdownMenuItem(
-                    value: 'Food',
-                    child: Text('Food'),
+                    value: 'Local File',
+                    child: Text('Local File'),
                   ),
                   DropdownMenuItem(
-                    value: 'Transportation',
-                    child: Text('Transportation'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Living',
-                    child: Text('Living'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Entertainment',
-                    child: Text('Entertainment'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Misc.',
-                    child: Text('Misc.'),
+                    value: 'Remote API',
+                    child: Text('Remote API'),
                   ),
                 ],
                 onChanged: (value) {
                   setState(() {
-                    _category = value;
+                    _dataSource = value;
                   });
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please select a category';
+                    return 'Please select a data source';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 9),
               DropdownButtonFormField<String>(
-                value: _expenseType,
+                value: _fileType,
                 decoration: const InputDecoration(
-                  labelText: 'Frequency',
+                  labelText: 'File Type',
                   labelStyle: TextStyle(color: Colors.white),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
@@ -285,34 +227,22 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                 style: const TextStyle(color: Colors.white),
                 items: const [
                   DropdownMenuItem(
-                    value: 'Daily',
-                    child: Text('Daily'),
+                    value: 'csv',
+                    child: Text('CSV'),
                   ),
                   DropdownMenuItem(
-                    value: 'Weekly',
-                    child: Text('Weekly'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Monthly',
-                    child: Text('Monthly'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Bi-Monthly',
-                    child: Text('Bi-Monthly'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Yearly',
-                    child: Text('Yearly'),
+                    value: 'json',
+                    child: Text('JSON'),
                   ),
                 ],
                 onChanged: (value) {
                   setState(() {
-                    _expenseType = value;
+                    _fileType = value;
                   });
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please select a frequency';
+                    return 'Please select a file type';
                   }
                   return null;
                 },
@@ -334,27 +264,21 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         ElevatedButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              widget.addExpense(
-                _titleController.text,
-                double.parse(_amountController.text),
-                _date!,
-                _category!,
-              );
+              widget.loadData(_dataSource!, _fileType!);
               Navigator.pop(context);
             }
           },
-          child: const Text('Add Expense'),
+          child: const Text('Load Data'),
         ),
       ],
     );
   }
 }
 
-// class Expense {
+// class DataModel {
 //   final String title;
-//   final double amount;
-//   final DateTime date;
-//   final String category;
+//   final String description;
+//   final String dataType;
 //
-//   Expense(this.title, this.amount, this.date, this.category);
+//   DataModel(this.title, this.description, this.dataType);
 // }
